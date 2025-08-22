@@ -141,7 +141,7 @@ bool AWeatherXVolumeBase::IsActive(const FVector& ViewPos)
 #endif
 
 	float DistToVolume = CalcDistToVolumeBoundary(ViewPos);
-	bool IsActivated = (FVector::DistSquared(ViewPos, GetActorLocation()) <= (ActiveRadius * ActiveRadius)) && (DistToVolume < TransitionWidth&& DistToVolume >= 0.0f);
+	bool IsActivated = (FVector::DistSquared(ViewPos, GetActorLocation()) <= (ActiveRadius * ActiveRadius)) && (DistToVolume < TransitionWidth && DistToVolume >= 0.0f);
 	
 	if (IsActivated)
 	{

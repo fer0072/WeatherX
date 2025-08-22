@@ -8,6 +8,7 @@
 #include "WeatherXExtendedData.generated.h"
 
 class AExponentialHeightFog;
+class UDirectionalLightComponent;
 
 
 USTRUCT(BlueprintType)
@@ -28,16 +29,19 @@ public:
 public:
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
-	float DirLightIntensity = 7.0f;
+	float DirLightIntensity = 0.0f;
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
 	FLinearColor DirLightColor = FLinearColor();
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
-	float DirLightSourceAngle = 0.535700f;
+	float DirLightSourceAngle = 0.0f;
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
-	float DirLightTemoerature = 7000.0f;
+	float DirLightTemoerature = 0.0f;
+
+private:
+	TWeakObjectPtr<UDirectionalLightComponent> DirLightComponent;
 };
 
 USTRUCT(BlueprintType)

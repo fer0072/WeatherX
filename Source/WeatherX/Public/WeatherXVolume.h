@@ -19,7 +19,7 @@ class ALevelSequenceActor;
 /**
  * Cuboid style weather volume. Used to control weather effect.
  */
-UCLASS(hideCategories = (Rendering, Physics, LOD, Activation, Input, Collision, Replication, Actor, Cooking, "BrushSettings"))
+UCLASS(Abstract)
 class WEATHERX_API AWeatherXVolumeBase : public AVolume, public IWeatherXDataSourceInterface
 {
 	GENERATED_BODY()
