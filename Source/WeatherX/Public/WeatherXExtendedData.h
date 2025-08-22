@@ -7,94 +7,67 @@
 #include "WeatherXBaseData.h"
 #include "WeatherXExtendedData.generated.h"
 
-class AExponentialHeightFog;
 class UDirectionalLightComponent;
+class USkyLightComponent;
+class USkyAtmosphereComponent;
+class UExponentialHeightFogComponent;
 
 
 USTRUCT(BlueprintType)
-struct WEATHERX_API FWeatherXLightData : public FWeatherXBaseData
+struct WEATHERX_API FWeatherXDirectionalLightData : public FWeatherXBaseData
 {
 	GENERATED_BODY()
 
 public:
 
-	FWeatherXLightData() = default;
+	FWeatherXDirectionalLightData() = default;
 
-	virtual ~FWeatherXLightData() = default;
+	virtual ~FWeatherXDirectionalLightData() = default;
 
-	virtual UScriptStruct* GetScriptStruct() const override { return FWeatherXLightData::StaticStruct(); };
+	virtual UScriptStruct* GetScriptStruct() const override { return FWeatherXDirectionalLightData::StaticStruct(); };
 
 	virtual void Apply() override;
 
 public:
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
-	float DirLightIntensity = 0.0f;
+	float DirLightIntensity = 7.0f;
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
-	FLinearColor DirLightColor = FLinearColor();
+	FLinearColor DirLightColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
-	float DirLightSourceAngle = 0.0f;
+	float DirLightSourceAngle = 0.5357f;
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
-	float DirLightTemoerature = 0.0f;
+	float DirLightTemoerature = 7000.0f;
 
 private:
 	TWeakObjectPtr<UDirectionalLightComponent> DirLightComponent;
 };
 
 USTRUCT(BlueprintType)
-struct WEATHERX_API FWeatherXParticleData : public FWeatherXBaseData
+struct WEATHERX_API FWeatherXSkyLightData : public FWeatherXBaseData
 {
 	GENERATED_BODY()
 
 public:
 
-	FWeatherXParticleData() = default;
+	FWeatherXSkyLightData() = default;
 
-	virtual ~FWeatherXParticleData() = default;
+	virtual ~FWeatherXSkyLightData() = default;
 
-	virtual UScriptStruct* GetScriptStruct() const override { return FWeatherXParticleData::StaticStruct(); };
-
-	virtual void Apply() override;
-
-public:
-
-	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Particle Data")
-    float SpawnRate = 0.0f;
-};
-
-USTRUCT(BlueprintType)
-struct WEATHERX_API FWeatherXMaterialData : public FWeatherXBaseData
-{
-	GENERATED_BODY()
-
-public:
-
-	FWeatherXMaterialData() = default;
-
-	~FWeatherXMaterialData() = default;
-
-	virtual UScriptStruct* GetScriptStruct() const override { return FWeatherXMaterialData::StaticStruct(); };
-
-	virtual void MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& DataList, TArray<float> RatioList) override;
+	virtual UScriptStruct* GetScriptStruct() const override { return FWeatherXSkyLightData::StaticStruct(); };
 
 	virtual void Apply() override;
 
-	virtual void CalcTrackedID() override;
-
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather Material Data")
-	TSoftObjectPtr<UMaterialParameterCollection> MPCPath;
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
+	float SkyLightIntensity = 1.0f;
 
-	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Material Data")
-    float RainIntensity = 0.0f;
-
-	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Material Data")
-    float SnowIntensity = 0.0f;
-
+private:
+	TWeakObjectPtr<USkyLightComponent> SkyLightComponent;
 };
 
 USTRUCT(BlueprintType)
@@ -115,42 +88,25 @@ public:
 public:
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Sky Atmosphere Data")
-	FLinearColor RayleighScattering = FLinearColor(0.0f, 0.170605f, 1.0f, 1.0f);
+	float MultiScattering = 1.0f;
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Sky Atmosphere Data")
-    float RayleighScatteringScale = 0.0331f;
-};
+	FLinearColor RayleighScattering = FLinearColor(0.145833f, 0.386545f, 1.0f, 1.0f);
 
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Sky Atmosphere Data")
+	float MieScatteringScale = 0.003996f;
 
-USTRUCT(BlueprintType)
-struct WEATHERX_API FWeatherXVolumetricCloudData : public FWeatherXBaseData
-{
-	GENERATED_BODY()
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Sky Atmosphere Data")
+	float MieAbsorptionScale = 0.000444f;
 
-public:
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Sky Atmosphere Data")
+	float MieAnisotropy = 0.8f;
 
-	FWeatherXVolumetricCloudData() = default;
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Sky Atmosphere Data")
+	float AerialPerspectiveViewDistanceScale = 1.0f;
 
-	virtual ~FWeatherXVolumetricCloudData() = default;
-
-	virtual UScriptStruct* GetScriptStruct() const override { return FWeatherXVolumetricCloudData::StaticStruct(); };
-
-	virtual void MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& DataList, TArray<float> RatioList);
-
-	virtual void Apply() override;
-
-	virtual void CalcTrackedID() override;
-
-public:
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather Volumetric Cloud Data")
-	TSoftObjectPtr<UMaterialParameterCollection> MPCPath;
-
-	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Volumetric Cloud Data")
-    float CloudScale = 0.0f;
-
-	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Volumetric Cloud Data")
-	FLinearColor CloudColor = FLinearColor();
+private:
+	TWeakObjectPtr<USkyAtmosphereComponent> SkyAtmosphereComponent;
 };
 
 USTRUCT(BlueprintType)
@@ -171,11 +127,11 @@ public:
 public:
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Exponential Height Fog Data")
-    float FogDensity = 0.0f;
+	FLinearColor EmissiveColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Exponential Height Fog Data")
-	FLinearColor FogInscatteringColor = FLinearColor();
+	float ExtinctionScale = 0.5f;
 
-	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Exponential Height Fog Data")
-	FLinearColor DirectionalInscatteringColor = FLinearColor();
+private:
+	TWeakObjectPtr<UExponentialHeightFogComponent> ExponentialHeightFogComponent;
 };

@@ -5,6 +5,8 @@
 #include "NiagaraActor.h"
 #include "Engine/DirectionalLight.h"
 #include "Components/DirectionalLightComponent.h"
+#include "Engine/SkyLight.h"
+#include "Components/SkyLightComponent.h"
 #include "Engine/ExponentialHeightFog.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/DirectionalLightComponent.h"
@@ -18,125 +20,132 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/Material.h"
 
-// Override implementation of CalcTrackedID.
-void FWeatherXVolumetricCloudData::CalcTrackedID()
-{
-	Super::CalcTrackedID();
-
-	if (MPCPath)
-	{
-		FString MPCStr = MPCPath->GetFName().GetPlainNameString();
-		TrackedID.Append(MPCStr);
-	}
-}
-
-void FWeatherXMaterialData::CalcTrackedID()
-{
-	Super::CalcTrackedID();
-
-	if (MPCPath)
-	{
-		FString MPCStr = MPCPath->GetFName().GetPlainNameString();
-		TrackedID.Append(MPCStr);
-	}
-}
-
-// Override implementation of MergeInto.
-void FWeatherXMaterialData::MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& DataList, TArray<float> RatioList)
-{
-	Super::MergeInto(DataList, RatioList);
-
-	FWeatherXMaterialData* TempData = static_cast<FWeatherXMaterialData*>(DataList[0].Get());
-
-	MPCPath = TempData->MPCPath;
-}
-
-void FWeatherXVolumetricCloudData::MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& DataList, TArray<float> RatioList)
-{
-	Super::MergeInto(DataList, RatioList);
-
-	FWeatherXVolumetricCloudData* TempData = static_cast<FWeatherXVolumetricCloudData*>(DataList[0].Get());
-
-	MPCPath = TempData->MPCPath;
-}
-
 // Override implementation of Apply.
-void FWeatherXLightData::Apply()
+void FWeatherXDirectionalLightData::Apply()
 {
-	ADirectionalLight* LightActor = Cast<ADirectionalLight>(TrackedInstance);
-	if (LightActor)
+	if (!TrackedInstance.IsValid())
 	{
-		UDirectionalLightComponent* LighComponent = LightActor->GetComponent();
-		LighComponent->SetIntensity(DirLightIntensity);
-		LighComponent->SetLightColor(DirLightColor);
-		LighComponent->SetLightSourceAngle(DirLightSourceAngle);
-		LighComponent->SetTemperature(DirLightTemoerature);
+		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Directional Light Data! Please Assign Tracked Instance!"));
+	}
+
+	if (!DirLightComponent.IsValid())
+	{
+		ADirectionalLight* DirLightActor = Cast<ADirectionalLight>(TrackedInstance);
+		if (DirLightActor)
+		{
+			DirLightComponent = DirLightActor->GetComponent();
+		}
+		else
+		{
+			for (auto Component : TrackedInstance->GetComponents())
+			{
+				DirLightComponent = Cast<UDirectionalLightComponent>(Component);
+				if (DirLightComponent.IsValid() && DirLightComponent->IsVisible()) break;
+			}
+		}
+	}
+
+	if (DirLightComponent.IsValid())
+	{
+		DirLightComponent->SetIntensity(DirLightIntensity);
+		DirLightComponent->SetLightColor(DirLightColor);
+		DirLightComponent->SetLightSourceAngle(DirLightSourceAngle);
+		DirLightComponent->SetTemperature(DirLightTemoerature);
 	}
 }
 
-void FWeatherXParticleData::Apply()
+void FWeatherXSkyLightData::Apply()
 {
-	ANiagaraActor* InNiagaraActor = Cast<ANiagaraActor>(TrackedInstance);
-	if (InNiagaraActor)
+	if (!TrackedInstance.IsValid())
 	{
-		InNiagaraActor->GetNiagaraComponent()->SetFloatParameter(FName("Spawn Rate"), SpawnRate);
+		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Sky Light Data! Please Assign Tracked Instance!"));
 	}
-}
 
-void FWeatherXMaterialData::Apply()
-{
-	if (MPCPath)
+	if (!SkyLightComponent.IsValid())
 	{
-		AActor* Inst = TrackedInstance.Get();
-		
-		UKismetMaterialLibrary::SetScalarParameterValue(Inst, MPCPath.Get(), TEXT("RainIntensity"), RainIntensity);
-		UKismetMaterialLibrary::SetScalarParameterValue(Inst, MPCPath.Get(), TEXT("SnowIntensity"), FMath::Pow(SnowIntensity, 5.0f));//这里立方是发现线性使变化太过剧烈
+		ASkyLight* SkyLightActor = Cast<ASkyLight>(TrackedInstance);
+		if (SkyLightActor)
+		{
+			SkyLightComponent = SkyLightActor->GetLightComponent();
+		}
+		else
+		{
+			for (auto Component : TrackedInstance->GetComponents())
+			{
+				SkyLightComponent = Cast<USkyLightComponent>(Component);
+				if (SkyLightComponent.IsValid() && SkyLightComponent->IsVisible()) break;
+			}
+		}
+	}
 
-		//debug
-		//UE_LOG(LogWeatherX, Log, TEXT("---------------------------------------------------"));
-		//UE_LOG(LogWeatherX, Log, TEXT("RainIntensity : %f, SnowIntensity : %f"), RainIntensity, SnowIntensity);
+	if (SkyLightComponent.IsValid())
+	{
+		SkyLightComponent->SetIntensity(SkyLightIntensity);
 	}
 }
 
 void FWeatherXSkyAtmosphereData::Apply()
 {
-	ASkyAtmosphere* SkyAtmosphereActor = Cast<ASkyAtmosphere>(TrackedInstance);
-	if (SkyAtmosphereActor)
+	if (!TrackedInstance.IsValid())
 	{
-		USkyAtmosphereComponent* SkyAtmosphereComponent = SkyAtmosphereActor->GetComponent();
-		SkyAtmosphereComponent->SetRayleighScattering(RayleighScattering);
-		SkyAtmosphereComponent->SetRayleighScatteringScale(RayleighScatteringScale);
+		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Sky Atmosphere Data! Please Assign Tracked Instance!"));
 	}
-}
 
-void FWeatherXVolumetricCloudData::Apply()
-{
-	if (MPCPath)
+	if (!SkyAtmosphereComponent.IsValid())
 	{
-		AActor* Inst = TrackedInstance.Get();
-		UKismetMaterialLibrary::SetScalarParameterValue(Inst, MPCPath.Get(), TEXT("CloudScale"), CloudScale);
-		UKismetMaterialLibrary::SetVectorParameterValue(Inst, MPCPath.Get(), TEXT("CloudColor"), CloudColor);
-		//debug
-		//UE_LOG(LogWeatherX, Log, TEXT("-----------------------------------------"));
-		//UE_LOG(LogWeatherX, Log, TEXT("CloudScale: %f"), CloudScale);
-		//UE_LOG(LogWeatherX, Log, TEXT("Cloud Color : %f, %f, %f, %f"), CloudColor.R, CloudColor.G, CloudColor.B, CloudColor.A);
+		ASkyAtmosphere* SkyAtmosphereActor = Cast<ASkyAtmosphere>(TrackedInstance);
+		if (SkyAtmosphereActor)
+		{
+			SkyAtmosphereComponent = SkyAtmosphereActor->GetComponent();
+		}
+		else
+		{
+			for (auto Component : TrackedInstance->GetComponents())
+			{
+				SkyAtmosphereComponent = Cast<USkyAtmosphereComponent>(Component);
+				if (SkyAtmosphereComponent.IsValid() && SkyAtmosphereComponent->IsVisible()) break;
+			}
+		}
+	}
+
+	if (SkyAtmosphereComponent.IsValid())
+	{
+		SkyAtmosphereComponent->SetMultiScatteringFactor(MultiScattering);
+		SkyAtmosphereComponent->SetRayleighScattering(RayleighScattering);
+		SkyAtmosphereComponent->SetMieScatteringScale(MieScatteringScale);
+		SkyAtmosphereComponent->SetMieAbsorptionScale(MieAbsorptionScale);
+		SkyAtmosphereComponent->SetMieAnisotropy(MieAnisotropy);
+		SkyAtmosphereComponent->SetAerialPespectiveViewDistanceScale(AerialPerspectiveViewDistanceScale);
 	}
 }
 
 void FWeatherXExponentialHeightFogData::Apply()
 {
-	AExponentialHeightFog* FogActor = Cast<AExponentialHeightFog>(TrackedInstance);
-	if (FogActor)
+	if (!TrackedInstance.IsValid())
 	{
-		UExponentialHeightFogComponent* FogComponent = FogActor->GetComponent();
-		FogComponent->SetFogDensity(FogDensity);
-		FogComponent->SetFogInscatteringColor(FogInscatteringColor);
-		FogComponent->SetDirectionalInscatteringColor(DirectionalInscatteringColor);
+		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Exponential Height Fog Data! Please Assign Tracked Instance!"));
+	}
 
-		//debug
-		//UE_LOG(LogWeatherX, Log, TEXT("----------------------------"));
-		//UE_LOG(LogWeatherX, Log, TEXT("FogDensity : %f"), FogDensity);
-		//UE_LOG(LogWeatherX, Log, TEXT("FogInscatteringColor : %f, %f, %f, %f"), FogInscatteringColor.R, FogInscatteringColor.G, FogInscatteringColor.B, FogInscatteringColor.A);
-		//UE_LOG(LogWeatherX, Log, TEXT("DirectionalInscatteringColor : %f, %f, %f, %f"), DirectionalInscatteringColor.R, DirectionalInscatteringColor.G, DirectionalInscatteringColor.B, DirectionalInscatteringColor.A);
+	if (!ExponentialHeightFogComponent.IsValid())
+	{
+		AExponentialHeightFog* ExponentialHeightFogActor = Cast<AExponentialHeightFog>(TrackedInstance);
+		if (ExponentialHeightFogActor)
+		{
+			ExponentialHeightFogComponent = ExponentialHeightFogActor->GetComponent();
+		}
+		else
+		{
+			for (auto Component : TrackedInstance->GetComponents())
+			{
+				ExponentialHeightFogComponent = Cast<UExponentialHeightFogComponent>(Component);
+				if (ExponentialHeightFogComponent.IsValid() && ExponentialHeightFogComponent->IsVisible()) break;
+			}
+		}
+	}
+
+	if (ExponentialHeightFogComponent.IsValid())
+	{
+		ExponentialHeightFogComponent->SetVolumetricFogEmissive(EmissiveColor);
+		ExponentialHeightFogComponent->SetVolumetricFogExtinctionScale(ExtinctionScale);
 	}
 }
