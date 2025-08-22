@@ -54,7 +54,7 @@ TSharedPtr<FWeatherXBaseData> UWeatherXDataPacket::MergeDataAcrossLayers(TArray<
 	}
 
 	DataList.Sort([](const TSharedPtr<FWeatherXBaseData>& A, const TSharedPtr<FWeatherXBaseData>& B) {
-		return A->Priority > B->Priority;
+		return A->Priority < B->Priority;
 		});
 
 	float FinalOpacity = 0.0f;
@@ -130,7 +130,7 @@ UWeatherXDataPacket* UWeatherXDataPacket::MergeDataPacket(TArray<UWeatherXDataPa
 	{
 		TArray<int32>& IndicesArray = Elem.Value;
 		IndicesArray.Sort([&DataList](const int32 a, const int32 b) {
-			return DataList[a]->Priority > DataList[b]->Priority;
+			return DataList[a]->Priority < DataList[b]->Priority;
 			});
 
 		TArray<TSharedPtr<FWeatherXBaseData>> MergedDataInEachLayer;

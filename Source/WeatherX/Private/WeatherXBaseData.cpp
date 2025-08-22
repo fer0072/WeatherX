@@ -1,48 +1,33 @@
+#include "Math/UnrealMathUtility.h"
 #include "WeatherXBaseData.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
-namespace WeatherDataIncrementationProcess
+namespace WeatherDataLerpProcess
 {
-	void Increment(const UScriptStruct* InStruct, void* FinalData, const void* IncrementalData, float Ratio);
-
 	template<class T>
-	T IncrementValue(T& BaseData, const T& IncrementalData, float Ratio)
+	T LerpValue(const T& BaseData, const T& InterpolativeData, float Alpha)
 	{
-		return BaseData + IncrementalData * Ratio;
-	}
-
-	template<>
-	FTransform IncrementValue(FTransform& BaseData, const FTransform& IncrementalData, float Ratio)
-	{
-		if (Ratio < KINDA_SMALL_NUMBER)
-		{
-			return BaseData;
-		}
-		else
-		{
-			BaseData.AccumulateWithShortestRotation(IncrementalData, ScalarRegister(Ratio));
-		}
-		return BaseData;
+		return FMath::Lerp(BaseData, InterpolativeData, Alpha);
 	}
 
 	template<class T>
-	void IncrementInternal(const FStructProperty* StructProperty, void* FinalData, const void* IncrementalData, float Ratio)
+	void LerpInternal(const FStructProperty* StructProperty, void* Result, const void* BaseData, const void* InterpolativeData, float Alpha)
 	{
 		for (int32 ArrayIndex = 0; ArrayIndex < StructProperty->ArrayDim; ++ArrayIndex)
 		{
-			const T* IncrementalValue = StructProperty->ContainerPtrToValuePtr<T>(IncrementalData, ArrayIndex);
+			const T* BaseValue = StructProperty->ContainerPtrToValuePtr<T>(BaseData, ArrayIndex);
+			const T* InterpolativeValue = StructProperty->ContainerPtrToValuePtr<T>(InterpolativeData, ArrayIndex);
 
-			T* ValueResultPtr = StructProperty->ContainerPtrToValuePtr<T>(FinalData, ArrayIndex);
+			T* ResultPtr = StructProperty->ContainerPtrToValuePtr<T>(Result, ArrayIndex);
 
-			T ValueResult = IncrementValue(*ValueResultPtr, *IncrementalValue, Ratio);
+			T ResultValue = LerpValue(*BaseValue, *InterpolativeValue, Alpha);
 
-			StructProperty->CopySingleValue(ValueResultPtr, &ValueResult);
+			StructProperty->CopySingleValue(ResultPtr, &ResultValue);
 		}
 	}
 
-
-	void Increment(const UScriptStruct* InStruct, void* FinalData, const void* IncrementalData, float Ratio)
+	void Lerp(const UScriptStruct* InStruct, void* Result, const void* BaseData, const void* InterpolativeData, float Alpha)
 	{
 		for (TFieldIterator<FProperty> Itt(InStruct); Itt; ++Itt)
 		{
@@ -55,28 +40,30 @@ namespace WeatherDataIncrementationProcess
 					{
 						for (int32 ArrayIndex = 0; ArrayIndex < NumericProperty->ArrayDim; ++ArrayIndex)
 						{
-							const void* IncrementalPropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(IncrementalData, ArrayIndex);
-							double IncrementalValue = NumericProperty->GetFloatingPointPropertyValue(IncrementalPropertyData);
+							const void* BasePropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(BaseData, ArrayIndex);
+							double BaseValue = NumericProperty->GetFloatingPointPropertyValue(BasePropertyData);
 
-							void* PropertyDataResult = NumericProperty->ContainerPtrToValuePtr<void>(FinalData, ArrayIndex);
-							double ValueResult = NumericProperty->GetFloatingPointPropertyValue(PropertyDataResult);
+							const void* InterpolativePropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(InterpolativeData, ArrayIndex);
+							double InterpolativeValue = NumericProperty->GetFloatingPointPropertyValue(InterpolativePropertyData);
 
-							ValueResult += IncrementalValue * Ratio;
-							NumericProperty->SetFloatingPointPropertyValue(PropertyDataResult, ValueResult);
+							void* ResultPropertyData = NumericProperty->ContainerPtrToValuePtr<void>(Result, ArrayIndex);
+							double ResultValue = FMath::Lerp(BaseValue, InterpolativeValue, Alpha);
+							NumericProperty->SetFloatingPointPropertyValue(ResultPropertyData, ResultValue);							
 						}
 					}
 					else if (NumericProperty->IsInteger())
 					{
 						for (int32 ArrayIndex = 0; ArrayIndex < NumericProperty->ArrayDim; ++ArrayIndex)
 						{
-							const void* IncrementalPropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(IncrementalData, ArrayIndex);
-							int64 IncrementalValue = NumericProperty->GetSignedIntPropertyValue(IncrementalPropertyData);
+							const void* BasePropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(BaseData, ArrayIndex);
+							int64 BaseValue = NumericProperty->GetFloatingPointPropertyValue(BasePropertyData);
 
-							void* PropertyDataResult = NumericProperty->ContainerPtrToValuePtr<void>(FinalData, ArrayIndex);
-							int64 ValueResult = NumericProperty->GetSignedIntPropertyValue(PropertyDataResult);
+							const void* InterpolativePropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(InterpolativeData, ArrayIndex);
+							int64 InterpolativeValue = NumericProperty->GetFloatingPointPropertyValue(InterpolativePropertyData);
 
-							ValueResult += IncrementalValue * Ratio;
-							NumericProperty->SetIntPropertyValue(PropertyDataResult, ValueResult);
+							void* ResultPropertyData = NumericProperty->ContainerPtrToValuePtr<void>(Result, ArrayIndex);
+							int64 ResultValue = FMath::Lerp(BaseValue, InterpolativeValue, Alpha);
+							NumericProperty->SetFloatingPointPropertyValue(ResultPropertyData, ResultValue);
 						}
 					}
 				}
@@ -84,27 +71,23 @@ namespace WeatherDataIncrementationProcess
 				{
 					if (StructProperty->Struct->GetFName() == NAME_Vector)
 					{
-						IncrementInternal<FVector>(StructProperty, FinalData, IncrementalData, Ratio);
+						LerpInternal<FVector>(StructProperty, Result, BaseData, InterpolativeData, Alpha);
 					}
 					else if (StructProperty->Struct->GetFName() == NAME_Vector4)
 					{
-						IncrementInternal<FVector4>(StructProperty, FinalData, IncrementalData, Ratio);
+						LerpInternal<FVector4>(StructProperty, Result, BaseData, InterpolativeData, Alpha);
 					}
 					else if (StructProperty->Struct->GetFName() == NAME_Rotator)
 					{
-						IncrementInternal<FRotator>(StructProperty, FinalData, IncrementalData, Ratio);
+						LerpInternal<FRotator>(StructProperty, Result, BaseData, InterpolativeData, Alpha);
 					}
 					else if (StructProperty->Struct->GetFName() == NAME_Quat)
 					{
-						IncrementInternal<FQuat>(StructProperty, FinalData, IncrementalData, Ratio);
-					}
-					else if (StructProperty->Struct->GetFName() == NAME_Transform)
-					{
-						IncrementInternal<FTransform>(StructProperty, FinalData, IncrementalData, Ratio);
+						LerpInternal<FQuat>(StructProperty, Result, BaseData, InterpolativeData, Alpha);
 					}
 					else if (StructProperty->Struct->GetFName() == NAME_LinearColor)
 					{
-						IncrementInternal<FLinearColor>(StructProperty, FinalData, IncrementalData, Ratio);
+						LerpInternal<FLinearColor>(StructProperty, Result, BaseData, InterpolativeData, Alpha);
 					}
 				}
 			}
@@ -139,14 +122,16 @@ void FWeatherXBaseData::MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& D
 	UScriptStruct* InStruct = DataList[0]->GetScriptStruct();
 
 	TrackedInstance = DataList[0]->TrackedInstance;
-	
-	Priority = DataList[0]->Priority;
 
-	for (int32 Idx = 0; Idx < DataList.Num(); Idx++)
+	int32 NumberOfLayers = DataList.Num();
+	WeatherDataLerpProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[NumberOfLayers - 1].Get()), reinterpret_cast<const void*>(DataList[NumberOfLayers - 2].Get()), RatioList[NumberOfLayers - 2] / (RatioList[NumberOfLayers - 1] + RatioList[NumberOfLayers - 2]));
+	float UsedAlpha = RatioList[NumberOfLayers - 1] + RatioList[NumberOfLayers - 2];
+
+	for (int32 Idx = DataList.Num() - 3; Idx >= 0; Idx--)
 	{
-		WeatherDataIncrementationProcess::Increment(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[Idx].Get()), RatioList[Idx]);
+		WeatherDataLerpProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(this), reinterpret_cast<const void*>(DataList[Idx].Get()), RatioList[Idx] / (RatioList[Idx] + UsedAlpha));
+		UsedAlpha += RatioList[Idx];
 	}
-
 }
 
 void FWeatherXBaseData::Apply()
