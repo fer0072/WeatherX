@@ -42,7 +42,7 @@ public:
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
 	float DirLightTemoerature = 7000.0f;
 
-private:
+	UPROPERTY()
 	TWeakObjectPtr<UDirectionalLightComponent> DirLightComponent;
 };
 
@@ -66,7 +66,7 @@ public:
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
 	float SkyLightIntensity = 1.0f;
 
-private:
+	UPROPERTY()
 	TWeakObjectPtr<USkyLightComponent> SkyLightComponent;
 };
 
@@ -105,7 +105,7 @@ public:
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Sky Atmosphere Data")
 	float AerialPerspectiveViewDistanceScale = 1.0f;
 
-private:
+	UPROPERTY()
 	TWeakObjectPtr<USkyAtmosphereComponent> SkyAtmosphereComponent;
 };
 
@@ -127,11 +127,11 @@ public:
 public:
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Exponential Height Fog Data")
-	FLinearColor EmissiveColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	FLinearColor EmissiveColor = FLinearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Weather Exponential Height Fog Data")
 	float ExtinctionScale = 0.5f;
 
-private:
+	UPROPERTY()
 	TWeakObjectPtr<UExponentialHeightFogComponent> ExponentialHeightFogComponent;
 };
