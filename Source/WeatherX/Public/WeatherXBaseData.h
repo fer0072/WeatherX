@@ -41,6 +41,7 @@ public:
 
 	FString TrackedID;
 
+	EWeatherXBlendMode BlendMode = EWeatherXBlendMode::Lerp;
 
 	/*
 	 * attributes in derived class should be tagged with EditAnywhere for Sequencer to track, e.g:

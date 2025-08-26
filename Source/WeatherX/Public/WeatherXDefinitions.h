@@ -33,6 +33,14 @@ enum class EVolumeState : uint8
 };
 ENUM_CLASS_FLAGS(EVolumeState);
 
+enum class EWeatherXBlendMode : uint8
+{
+	None       UMETA(Hidden),
+	Increment  UMETA(DisplayName = "Increment"),
+	Lerp       UMETA(DisplayName = "Lerp"),
+};
+ENUM_CLASS_FLAGS(EWeatherXBlendMode);
+
 /** FWeatherXEvent describes when to begin a specific type of weather and how long it lasts. */
 USTRUCT(BlueprintType)
 struct FWeatherXEvent

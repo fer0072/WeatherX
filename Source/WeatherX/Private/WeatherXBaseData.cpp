@@ -3,8 +3,97 @@
 #include "Kismet/KismetSystemLibrary.h"
 
 
-namespace WeatherDataLerpProcess
+namespace WeatherDataBlendProcess
 {
+	template<class T>
+	T IncrementValue(const T& BaseData, const T& IncrementalData, float Ratio)
+	{
+		return BaseData + IncrementalData * Ratio;
+	}
+
+	template<class T>
+	void IncrementInternal(const FStructProperty* StructProperty, void* Result, const void* BaseData, const void* IncrementalData, float Ratio)
+	{
+		for (int32 ArrayIndex = 0; ArrayIndex < StructProperty->ArrayDim; ++ArrayIndex)
+		{
+			const T* BaseValue = StructProperty->ContainerPtrToValuePtr<T>(BaseData, ArrayIndex);
+			const T* IncrementalValue = StructProperty->ContainerPtrToValuePtr<T>(IncrementalData, ArrayIndex);
+
+			T* ResultPtr = StructProperty->ContainerPtrToValuePtr<T>(Result, ArrayIndex);
+
+			T ResultValue = IncrementValue(*BaseValue, *IncrementalValue, Ratio);
+
+			StructProperty->CopySingleValue(ResultPtr, &ResultValue);
+		}
+	}
+
+	void Increment(const UScriptStruct* InStruct, void* Result, const void* BaseData, const void* IncrementalData, float Ratio)
+	{
+		for (TFieldIterator<FProperty> Itt(InStruct); Itt; ++Itt)
+		{
+			FProperty* Property = *Itt;
+			if (Property->HasAllPropertyFlags(CPF_Interp))
+			{
+				if (FNumericProperty* NumericProperty = CastField<FNumericProperty>(Property))
+				{
+					if (NumericProperty->IsFloatingPoint())
+					{
+						for (int32 ArrayIndex = 0; ArrayIndex < NumericProperty->ArrayDim; ++ArrayIndex)
+						{
+							const void* BasePropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(BaseData, ArrayIndex);
+							double BaseValue = NumericProperty->GetFloatingPointPropertyValue(BasePropertyData);
+
+							const void* IncrementalPropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(IncrementalData, ArrayIndex);
+							double IncrementalValue = NumericProperty->GetFloatingPointPropertyValue(IncrementalPropertyData);
+
+							void* ResultPropertyData = NumericProperty->ContainerPtrToValuePtr<void>(Result, ArrayIndex);
+							double ResultValue = BaseValue + IncrementalValue * Ratio;
+							NumericProperty->SetFloatingPointPropertyValue(ResultPropertyData, ResultValue);
+						}
+					}
+					else if (NumericProperty->IsInteger())
+					{
+						for (int32 ArrayIndex = 0; ArrayIndex < NumericProperty->ArrayDim; ++ArrayIndex)
+						{
+							const void* BasePropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(BaseData, ArrayIndex);
+							int64 BaseValue = NumericProperty->GetFloatingPointPropertyValue(BasePropertyData);
+
+							const void* IncrementalPropertyData = NumericProperty->ContainerPtrToValuePtr<const void>(IncrementalData, ArrayIndex);
+							int64 IncrementalValue = NumericProperty->GetFloatingPointPropertyValue(IncrementalPropertyData);
+
+							void* ResultPropertyData = NumericProperty->ContainerPtrToValuePtr<void>(Result, ArrayIndex);
+							int64 ResultValue = BaseValue + IncrementalValue * Ratio;
+							NumericProperty->SetFloatingPointPropertyValue(ResultPropertyData, ResultValue);
+						}
+					}
+				}
+				else if (FStructProperty* StructProperty = CastField<FStructProperty>(Property))
+				{
+					if (StructProperty->Struct->GetFName() == NAME_Vector)
+					{
+						IncrementInternal<FVector>(StructProperty, Result, BaseData, IncrementalData, Ratio);
+					}
+					else if (StructProperty->Struct->GetFName() == NAME_Vector4)
+					{
+						IncrementInternal<FVector4>(StructProperty, Result, BaseData, IncrementalData, Ratio);
+					}
+					else if (StructProperty->Struct->GetFName() == NAME_Rotator)
+					{
+						IncrementInternal<FRotator>(StructProperty, Result, BaseData, IncrementalData, Ratio);
+					}
+					else if (StructProperty->Struct->GetFName() == NAME_Quat)
+					{
+						IncrementInternal<FQuat>(StructProperty, Result, BaseData, IncrementalData, Ratio);
+					}
+					else if (StructProperty->Struct->GetFName() == NAME_LinearColor)
+					{
+						IncrementInternal<FLinearColor>(StructProperty, Result, BaseData, IncrementalData, Ratio);
+					}
+				}
+			}
+		}
+	}
+
 	template<class T>
 	T LerpValue(const T& BaseData, const T& InterpolativeData, float Alpha)
 	{
@@ -124,14 +213,26 @@ void FWeatherXBaseData::MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& D
 	TrackedInstance = DataList[0]->TrackedInstance;
 
 	int32 NumberOfLayers = DataList.Num();
-	WeatherDataLerpProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[NumberOfLayers - 1].Get()), reinterpret_cast<const void*>(DataList[NumberOfLayers - 2].Get()), RatioList[NumberOfLayers - 2] / (RatioList[NumberOfLayers - 1] + RatioList[NumberOfLayers - 2]));
-	float UsedAlpha = RatioList[NumberOfLayers - 1] + RatioList[NumberOfLayers - 2];
 
-	for (int32 Idx = DataList.Num() - 3; Idx >= 0; Idx--)
+	if (DataList[0]->BlendMode == EWeatherXBlendMode::Lerp)
 	{
-		WeatherDataLerpProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(this), reinterpret_cast<const void*>(DataList[Idx].Get()), RatioList[Idx] / (RatioList[Idx] + UsedAlpha));
-		UsedAlpha += RatioList[Idx];
+		WeatherDataBlendProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[NumberOfLayers - 1].Get()), reinterpret_cast<const void*>(DataList[NumberOfLayers - 2].Get()), RatioList[NumberOfLayers - 2] / (RatioList[NumberOfLayers - 1] + RatioList[NumberOfLayers - 2]));
+		float UsedAlpha = RatioList[NumberOfLayers - 1] + RatioList[NumberOfLayers - 2];
+
+		for (int32 Idx = DataList.Num() - 3; Idx >= 0; Idx--)
+		{
+			WeatherDataBlendProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(this), reinterpret_cast<const void*>(DataList[Idx].Get()), RatioList[Idx] / (RatioList[Idx] + UsedAlpha));
+			UsedAlpha += RatioList[Idx];
+		}
 	}
+	else if (DataList[0]->BlendMode == EWeatherXBlendMode::Increment)
+	{
+		for (int32 Idx = 0; Idx < DataList.Num(); Idx++)
+		{
+			WeatherDataBlendProcess::Increment(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[Idx].Get()), 1.0f);
+		}
+	}
+	
 }
 
 void FWeatherXBaseData::Apply()
