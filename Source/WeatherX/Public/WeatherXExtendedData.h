@@ -44,6 +44,7 @@ public:
 
 	UPROPERTY()
 	TWeakObjectPtr<UDirectionalLightComponent> DirLightComponent;
+
 };
 
 USTRUCT(BlueprintType)
@@ -68,6 +69,7 @@ public:
 
 	UPROPERTY()
 	TWeakObjectPtr<USkyLightComponent> SkyLightComponent;
+
 };
 
 USTRUCT(BlueprintType)
@@ -107,6 +109,7 @@ public:
 
 	UPROPERTY()
 	TWeakObjectPtr<USkyAtmosphereComponent> SkyAtmosphereComponent;
+
 };
 
 USTRUCT(BlueprintType)
@@ -134,4 +137,47 @@ public:
 
 	UPROPERTY()
 	TWeakObjectPtr<UExponentialHeightFogComponent> ExponentialHeightFogComponent;
+
 };
+
+USTRUCT(BlueprintType)
+struct WEATHERX_API FWeatherXMaterialData : public FWeatherXBaseData
+{
+	GENERATED_BODY()
+
+public:
+
+	FWeatherXMaterialData() = default;
+
+	virtual ~FWeatherXMaterialData() = default;
+
+	virtual UScriptStruct* GetScriptStruct() const override { return FWeatherXMaterialData::StaticStruct(); };
+
+	virtual void MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& DataList, TArray<float> RatioList) override;
+
+	virtual void Apply() override;
+
+	virtual void CalcTrackedID() override;
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Material Data")
+	TSoftObjectPtr<UMaterialParameterCollection> MPCPath;
+
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Material Data")
+	float IsSnowy = 0.0f;
+
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Material Data")
+	float SnowAmount = 0.0f;
+
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Material Data")
+	float IsRainy = 0.0f;
+
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Material Data")
+	float EnableRaindropsPostprocessEffect = 0.0f;
+
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Material Data")
+	float PuddleSize = 0.0f;
+
+};
+

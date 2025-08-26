@@ -23,6 +23,8 @@ void FWeatherXDirectionalLightData::Apply()
 	if (!TrackedInstance.IsValid())
 	{
 		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Directional Light Data! Please Assign Tracked Instance!"));
+		
+		return;
 	}
 
 	if (!DirLightComponent.IsValid())
@@ -56,6 +58,8 @@ void FWeatherXSkyLightData::Apply()
 	if (!TrackedInstance.IsValid())
 	{
 		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Sky Light Data! Please Assign Tracked Instance!"));
+
+		return;
 	}
 
 	if (!SkyLightComponent.IsValid())
@@ -86,6 +90,8 @@ void FWeatherXSkyAtmosphereData::Apply()
 	if (!TrackedInstance.IsValid())
 	{
 		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Sky Atmosphere Data! Please Assign Tracked Instance!"));
+
+		return;
 	}
 
 	if (!SkyAtmosphereComponent.IsValid())
@@ -121,6 +127,8 @@ void FWeatherXExponentialHeightFogData::Apply()
 	if (!TrackedInstance.IsValid())
 	{
 		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Exponential Height Fog Data! Please Assign Tracked Instance!"));
+
+		return;
 	}
 
 	if (!ExponentialHeightFogComponent.IsValid())
@@ -144,5 +152,46 @@ void FWeatherXExponentialHeightFogData::Apply()
 	{
 		ExponentialHeightFogComponent->SetVolumetricFogEmissive(EmissiveColor);
 		ExponentialHeightFogComponent->SetVolumetricFogExtinctionScale(ExtinctionScale);
+	}
+}
+
+void FWeatherXMaterialData::MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& DataList, TArray<float> RatioList)
+{
+	Super::MergeInto(DataList, RatioList);
+
+	FWeatherXMaterialData* TempData = static_cast<FWeatherXMaterialData*>(DataList[0].Get());
+
+	MPCPath = TempData->MPCPath;
+}
+
+void FWeatherXMaterialData::Apply()
+{
+	if (!MPCPath)
+	{
+		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Material Data! Please Assign Tracked Material Parameter Collection!"));
+
+		return;
+	}
+
+	if (MPCPath)
+	{
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("IsSnowy"), IsSnowy);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("SnowAmount"), SnowAmount);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("IsRainy"), IsRainy);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("EnableRaindropsPostprocessEffect"), EnableRaindropsPostprocessEffect);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("PuddleSize"), PuddleSize);
+	}
+}
+
+void FWeatherXMaterialData::CalcTrackedID()
+{
+	Super::CalcTrackedID();
+
+	BlendMode = EWeatherXBlendMode::Increment;
+
+	if (MPCPath)
+	{
+		FString MPCStr = MPCPath->GetFName().GetPlainNameString();
+		TrackedID.Append(MPCStr);
 	}
 }
