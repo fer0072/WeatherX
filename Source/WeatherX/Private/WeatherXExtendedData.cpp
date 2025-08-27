@@ -12,6 +12,8 @@
 #include "Components/SkyAtmosphereComponent.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Kismet/KismetMaterialLibrary.h"
+#include "NiagaraActor.h"
+#include "NiagaraComponent.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
@@ -49,7 +51,7 @@ void FWeatherXDirectionalLightData::Apply()
 		DirLightComponent->SetIntensity(DirLightIntensity);
 		DirLightComponent->SetLightColor(DirLightColor);
 		DirLightComponent->SetLightSourceAngle(DirLightSourceAngle);
-		DirLightComponent->SetTemperature(DirLightTemoerature);
+		DirLightComponent->SetTemperature(DirLightTemperature);
 	}
 }
 
@@ -181,6 +183,31 @@ void FWeatherXMaterialData::Apply()
 		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("EnableRaindropsPostprocessEffect"), EnableRaindropsPostprocessEffect);
 		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("PuddleSize"), PuddleSize);
 	}
+
+	for (auto Component : TrackedInstance->GetComponents())
+	{
+		UNiagaraComponent* NiagaraComponent = Cast<UNiagaraComponent>(Component);
+		if (NiagaraComponent)
+		{
+			FString Name = NiagaraComponent->GetName();
+			bool ShouldEnable = false;
+			if (Name == FString("RainNiagaraSystemComponent"))
+			{
+				ShouldEnable = IsRainy > 0.0f;
+			}
+			else if (Name == FString("LightningNiagaraSystemComponent"))
+			{
+				ShouldEnable = IsRainy > 0.0f;
+			}
+			else if (Name == FString("SnowNiagaraSystemComponent"))
+			{
+				ShouldEnable = IsSnowy > 0.0f;
+			}
+
+			NiagaraComponent->SetActive(ShouldEnable);
+			NiagaraComponent->SetAutoActivate(ShouldEnable);
+		}
+	}
 }
 
 void FWeatherXMaterialData::CalcTrackedID()
@@ -193,5 +220,35 @@ void FWeatherXMaterialData::CalcTrackedID()
 	{
 		FString MPCStr = MPCPath->GetFName().GetPlainNameString();
 		TrackedID.Append(MPCStr);
+	}
+}
+
+void FWeatherXNiagaraData::Apply()
+{
+	if (!NiagaraComponent.IsValid())
+	{
+		ANiagaraActor* NiagaraActor = Cast<ANiagaraActor>(TrackedInstance);
+		if (NiagaraActor)
+		{
+			NiagaraComponent = NiagaraActor->GetNiagaraComponent();
+		}
+		else
+		{
+			for (auto Component : TrackedInstance->GetComponents())
+			{
+				NiagaraComponent = Cast<UNiagaraComponent>(Component);
+				if (NiagaraComponent.IsValid() && NiagaraComponent->IsActive())
+				{
+					FString Name = NiagaraComponent->GetName();
+					bool IsRainOrSnow = Name == FString("RainNiagaraSystemComponent") || (Name == FString("SnowNiagaraSystemComponent"));
+					if (IsRainOrSnow) break;
+				}
+			}
+		}
+	}
+
+	if (NiagaraComponent.IsValid())
+	{
+		NiagaraComponent->SetFloatParameter(FName("ParticleSpawnRate"), SpawnRate);
 	}
 }

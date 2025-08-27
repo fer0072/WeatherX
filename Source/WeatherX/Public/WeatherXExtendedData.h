@@ -11,6 +11,7 @@ class UDirectionalLightComponent;
 class USkyLightComponent;
 class USkyAtmosphereComponent;
 class UExponentialHeightFogComponent;
+class UNiagaraComponent;
 
 
 USTRUCT(BlueprintType)
@@ -40,7 +41,7 @@ public:
 	float DirLightSourceAngle = 0.5357f;
 
 	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Light Data")
-	float DirLightTemoerature = 7000.0f;
+	float DirLightTemperature = 7000.0f;
 
 	UPROPERTY()
 	TWeakObjectPtr<UDirectionalLightComponent> DirLightComponent;
@@ -180,4 +181,30 @@ public:
 	float PuddleSize = 0.0f;
 
 };
+
+USTRUCT(BlueprintType)
+struct WEATHERX_API FWeatherXNiagaraData : public FWeatherXBaseData
+{
+	GENERATED_BODY()
+
+public:
+
+	FWeatherXNiagaraData() = default;
+
+	virtual ~FWeatherXNiagaraData() = default;
+
+	virtual UScriptStruct* GetScriptStruct() const override { return FWeatherXNiagaraData::StaticStruct(); };
+
+	virtual void Apply() override;
+
+public:
+
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "Particle Parameter", meta = (DisplayName = "Niagara_SpawnRate"))
+	float SpawnRate = 0.0f;
+
+	UPROPERTY()
+	TWeakObjectPtr<UNiagaraComponent> NiagaraComponent;
+};
+
+
 
