@@ -18,12 +18,16 @@ public:
 
 public:
 
-	static TSharedPtr<FWeatherXBaseData> MergeDataInSingleLayer(const TArray<TSharedPtr<FWeatherXBaseData>>& DataList);
+	static TSharedPtr<FWeatherXBaseData> MergeDataInSingleLayer(TArray<TSharedPtr<FWeatherXBaseData>>& DataList);
 
 	static TSharedPtr<FWeatherXBaseData> MergeDataAcrossLayers(TArray<TSharedPtr<FWeatherXBaseData>>& DataList);
 
 	static UWeatherXDataPacket* MergeDataPacket(TArray<UWeatherXDataPacket*>& DataPackets);
 
 	void Apply();
+
+private:
+
+	static void RemoveShouldNotMergeData(TArray<TSharedPtr<FWeatherXBaseData>>& DataList);
 
 };

@@ -212,14 +212,12 @@ void FWeatherXBaseData::MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& D
 
 	TrackedInstance = DataList[0]->TrackedInstance;
 
-	int32 NumberOfLayers = DataList.Num();
-
 	if (DataList[0]->BlendMode == EWeatherXBlendMode::Lerp)
 	{
-		WeatherDataBlendProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[NumberOfLayers - 1].Get()), reinterpret_cast<const void*>(DataList[NumberOfLayers - 2].Get()), RatioList[NumberOfLayers - 2] / (RatioList[NumberOfLayers - 1] + RatioList[NumberOfLayers - 2]));
-		float UsedAlpha = RatioList[NumberOfLayers - 1] + RatioList[NumberOfLayers - 2];
+		WeatherDataBlendProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[0].Get()), reinterpret_cast<const void*>(DataList[1].Get()), RatioList[1] / (RatioList[0] + RatioList[1]));
+		float UsedAlpha = RatioList[0] + RatioList[1];
 
-		for (int32 Idx = DataList.Num() - 3; Idx >= 0; Idx--)
+		for (int32 Idx = 2; Idx < DataList.Num(); Idx++)
 		{
 			WeatherDataBlendProcess::Lerp(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<const void*>(this), reinterpret_cast<const void*>(DataList[Idx].Get()), RatioList[Idx] / (RatioList[Idx] + UsedAlpha));
 			UsedAlpha += RatioList[Idx];
@@ -229,7 +227,7 @@ void FWeatherXBaseData::MergeInto(const TArray<TSharedPtr<FWeatherXBaseData>>& D
 	{
 		for (int32 Idx = 0; Idx < DataList.Num(); Idx++)
 		{
-			WeatherDataBlendProcess::Increment(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[Idx].Get()), 1.0f);
+			WeatherDataBlendProcess::Increment(InStruct, reinterpret_cast<void*>(this), reinterpret_cast<void*>(this), reinterpret_cast<const void*>(DataList[Idx].Get()), RatioList[Idx]);
 		}
 	}
 	

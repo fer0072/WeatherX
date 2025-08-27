@@ -1,8 +1,33 @@
 #include "WeatherXDataPacket.h"
 
-/* Merge weather data in the same layer, i.e. data has the same priority */
-TSharedPtr<FWeatherXBaseData> UWeatherXDataPacket::MergeDataInSingleLayer(const TArray<TSharedPtr<FWeatherXBaseData>>& DataList)
+void UWeatherXDataPacket::RemoveShouldNotMergeData(TArray<TSharedPtr<FWeatherXBaseData>>& DataList)
 {
+	if (DataList.Num() == 1)
+	{
+		return;
+	}
+
+	// Remove data that is marked as not be merged.
+	TArray<int32> IndicesToBeRemoved;
+	for (int32 index = 0; index < DataList.Num(); index++)
+	{
+		if (DataList[index]->ShouldDataBeMerged == false)
+		{
+			IndicesToBeRemoved.Add(index);
+		}
+	}
+
+	for (int32 Idx : IndicesToBeRemoved)
+	{
+		DataList.RemoveAt(Idx, 1, EAllowShrinking::Yes);
+	}
+}
+
+/* Merge weather data in the same layer, i.e. data has the same priority */
+TSharedPtr<FWeatherXBaseData> UWeatherXDataPacket::MergeDataInSingleLayer(TArray<TSharedPtr<FWeatherXBaseData>>& DataList)
+{
+	RemoveShouldNotMergeData(DataList);
+
 	if (DataList.Num() == 1)
 	{
 		return DataList[0];
@@ -48,13 +73,15 @@ TSharedPtr<FWeatherXBaseData> UWeatherXDataPacket::MergeDataInSingleLayer(const 
 /* Merge weather data across layers, i.e. data has the different priority */
 TSharedPtr<FWeatherXBaseData> UWeatherXDataPacket::MergeDataAcrossLayers(TArray<TSharedPtr<FWeatherXBaseData>>& DataList)
 {
+	RemoveShouldNotMergeData(DataList);
+
 	if (DataList.Num() == 1)
 	{
 		return DataList[0];
 	}
 
 	DataList.Sort([](const TSharedPtr<FWeatherXBaseData>& A, const TSharedPtr<FWeatherXBaseData>& B) {
-		return A->Priority < B->Priority;
+		return A->Priority > B->Priority;
 		});
 
 	float FinalOpacity = 0.0f;
@@ -108,7 +135,7 @@ UWeatherXDataPacket* UWeatherXDataPacket::MergeDataPacket(TArray<UWeatherXDataPa
 
 	TMap<FString, TArray<int32>> IdToIndicesMap;
 
-	TArray<int32> IndexToBeRemovedArray;
+	TArray<int32> IndicesToBeRemoved;
 
 	// Classify the weather data based on the tracked instance.
 	for (int32 Index = 0; Index < DataList.Num(); Index++)
@@ -130,7 +157,7 @@ UWeatherXDataPacket* UWeatherXDataPacket::MergeDataPacket(TArray<UWeatherXDataPa
 	{
 		TArray<int32>& IndicesArray = Elem.Value;
 		IndicesArray.Sort([&DataList](const int32 a, const int32 b) {
-			return DataList[a]->Priority < DataList[b]->Priority;
+			return DataList[a]->Priority > DataList[b]->Priority;
 			});
 
 		TArray<TSharedPtr<FWeatherXBaseData>> MergedDataInEachLayer;
@@ -158,14 +185,14 @@ UWeatherXDataPacket* UWeatherXDataPacket::MergeDataPacket(TArray<UWeatherXDataPa
 		// Merge weather data that has different priority.
 		NewMergedData.Add(MergeDataAcrossLayers(MergedDataInEachLayer));
 
-		IndexToBeRemovedArray.Append(IndicesArray);
+		IndicesToBeRemoved.Append(IndicesArray);
 	}
 
-	IndexToBeRemovedArray.Sort([](const int32 a, const int32 b) {
+	IndicesToBeRemoved.Sort([](const int32 a, const int32 b) {
 		return a > b;
 		});
 
-	for (int32 Idx : IndexToBeRemovedArray)
+	for (int32 Idx : IndicesToBeRemoved)
 	{
 		DataList.RemoveAt(Idx, 1, EAllowShrinking::No);
 	}

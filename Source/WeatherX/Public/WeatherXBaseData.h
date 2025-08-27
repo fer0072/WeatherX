@@ -43,6 +43,8 @@ public:
 
 	EWeatherXBlendMode BlendMode = EWeatherXBlendMode::Lerp;
 
+	bool ShouldDataBeMerged = true;
+
 	/*
 	 * attributes in derived class should be tagged with EditAnywhere for Sequencer to track, e.g:
 	 * UPROPERTY(interp, EditAnywhere)
