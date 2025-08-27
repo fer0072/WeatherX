@@ -25,9 +25,4 @@ public:
 	static UWeatherXDataPacket* MergeDataPacket(TArray<UWeatherXDataPacket*>& DataPackets);
 
 	void Apply();
-
-private:
-
-	static void RemoveShouldNotMergeData(TArray<TSharedPtr<FWeatherXBaseData>>& DataList);
-
 };
