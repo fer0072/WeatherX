@@ -99,6 +99,13 @@ void AWeatherXVolumeBase::SetBaseParameters(float InOpacity)
 
 void AWeatherXVolumeBase::InitializePlayer(EWeatherType InitWeatherType)
 {
+	if (!WeatherType.Contains(InitWeatherType))
+	{
+		UE_LOG(LogWeatherX, Error, TEXT("The weather events uses weather type that isn't included in this volume! Please assign correct weather type!"));
+
+		return;
+	}
+
 	if (WeatherType[InitWeatherType].IsValid())
 	{
 		ULevelSequence* LevelSequenceAsset = GetSequence(InitWeatherType);

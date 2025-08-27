@@ -57,7 +57,7 @@ int32 UWeatherXVolumeManager::AddWeatherVolume(TWeakObjectPtr<AWeatherXVolumeBas
 {
 	if (!InVolume.IsValid())
 	{
-		UE_LOG(LogWeatherX, Warning, TEXT("Weather volume weak pointer is not valid!"))
+		UE_LOG(LogWeatherX, Warning, TEXT("Some of the weather volumes are not valid!"))
 		return -1;
 	}
 

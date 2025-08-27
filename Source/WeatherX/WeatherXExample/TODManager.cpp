@@ -239,7 +239,7 @@ void ATODManager::InitializeTODData()
 
 	if (!MPCPath)
 	{
-		UE_LOG(LogWeatherX, Error, TEXT("The tracked Material Parameter Collection is not valid in the TOD manager! Please assign valid Material Parameter Collection!"));
+		UE_LOG(LogWeatherX, Error, TEXT("The tracked Material Parameter Collection is not valid in the TOD manager! Please assign valid material parameter collection!"));
 		return;
 	}
 

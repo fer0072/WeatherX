@@ -15,12 +15,12 @@ void UWeatherXExampleBlender::CollectDataSources()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATODManager::StaticClass(), TODManagers);
 	if (TODManagers.Num() == 0)
 	{
-		UE_LOG(LogWeatherX, Log, TEXT("No such actor as ATODManager!"));
+		UE_LOG(LogWeatherX, Log, TEXT("No valid TOD manager!"));
 		return;
 	}
 	else if (TODManagers.Num() > 1)
 	{
-		UE_LOG(LogWeatherX, Log, TEXT("Too many TODManagers in current level!"));
+		UE_LOG(LogWeatherX, Error, TEXT("Too many TOD manager actors in current level!"));
 		return;
 	}
 	else
@@ -33,7 +33,7 @@ void UWeatherXExampleBlender::CollectDataSources()
 		}
 		else
 		{
-			UE_LOG(LogWeatherX, Log, TEXT("cast to TODManager failed!"));
+			UE_LOG(LogWeatherX, Log, TEXT("No valid TOD manager!"));
 			return;
 		}
 	}
@@ -46,7 +46,7 @@ void UWeatherXExampleBlender::CollectDataSources()
 	}
 	else
 	{
-		UE_LOG(LogWeatherX, Log, TEXT("WeatherXExampleSubsystem not constructed!"))
+		UE_LOG(LogWeatherX, Error, TEXT("No valid WeatherXExampleSubsystem!"))
 		return;
 	}
 }

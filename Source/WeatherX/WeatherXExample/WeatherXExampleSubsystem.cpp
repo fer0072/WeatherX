@@ -58,12 +58,12 @@ void UWeatherXExampleSubsystem::RegisterTOD()
 	//check num == 1
 	if (OutActors.Num() > 1)
 	{
-		UE_LOG(LogWeatherX, Log, TEXT("Too many ATODManager Actors"));
+		UE_LOG(LogWeatherX, Error, TEXT("Too many TOD manager actors!"));
 		return;
 	}
 	if (OutActors.Num() == 0)
 	{
-		UE_LOG(LogWeatherX, Log, TEXT("No ATODManager Actor exist"));
+		UE_LOG(LogWeatherX, Log, TEXT("No TOD manager actor exists!"));
 		return;
 	}
 

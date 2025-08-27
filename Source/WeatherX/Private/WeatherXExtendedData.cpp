@@ -24,7 +24,7 @@ void FWeatherXDirectionalLightData::Apply()
 {
 	if (!TrackedInstance.IsValid())
 	{
-		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Directional Light Data! Please Assign Tracked Instance!"));
+		UE_LOG(LogWeatherX, Error, TEXT("No tracked instance in the WeatherX directional light data! Please assign tracked instance!"));
 		
 		return;
 	}
@@ -59,7 +59,7 @@ void FWeatherXSkyLightData::Apply()
 {
 	if (!TrackedInstance.IsValid())
 	{
-		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Sky Light Data! Please Assign Tracked Instance!"));
+		UE_LOG(LogWeatherX, Error, TEXT("No tracked instance in the WeatherX sky light data! Please assign tracked instance!"));
 
 		return;
 	}
@@ -91,7 +91,7 @@ void FWeatherXSkyAtmosphereData::Apply()
 {
 	if (!TrackedInstance.IsValid())
 	{
-		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Sky Atmosphere Data! Please Assign Tracked Instance!"));
+		UE_LOG(LogWeatherX, Error, TEXT("No tracked instance in the WeatherX sky atmosphere data! Please assign tracked instance!"));
 
 		return;
 	}
@@ -128,7 +128,7 @@ void FWeatherXExponentialHeightFogData::Apply()
 {
 	if (!TrackedInstance.IsValid())
 	{
-		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Exponential Height Fog Data! Please Assign Tracked Instance!"));
+		UE_LOG(LogWeatherX, Error, TEXT("No tracked instance in the WeatherX exponential height fog data! Please assign tracked instance!"));
 
 		return;
 	}
@@ -170,7 +170,7 @@ void FWeatherXMaterialData::Apply()
 {
 	if (!MPCPath)
 	{
-		UE_LOG(LogWeatherX, Error, TEXT("No Tracked Instance in the WeatherX Material Data! Please Assign Tracked Material Parameter Collection!"));
+		UE_LOG(LogWeatherX, Error, TEXT("No tracked instance in the WeatherX material data! Please Assign Tracked Material Parameter Collection!"));
 
 		return;
 	}

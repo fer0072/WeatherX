@@ -37,7 +37,8 @@ UWeatherXVolumeManager* UWeatherXBaseSubsystem::GetWeatherVolumeManager(UWorld* 
 {
 	if (!InWorld)
 	{
-		UE_LOG(LogWeatherX, Warning, TEXT("World pointer appears to be null!"))
+		UE_LOG(LogWeatherX, Warning, TEXT("No valid UWorld instance!"));
+
 		return nullptr;
 	}
 
@@ -74,12 +75,12 @@ FVector UWeatherXBaseSubsystem::GetViewPosition()
 		}
 		else
 		{
-			UE_LOG(LogWeatherX, Log, TEXT("Player Pawn is not available!"));
+			UE_LOG(LogWeatherX, Error, TEXT("No valid player pawn!"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogWeatherX, Log, TEXT("Player Controller is not available!"));
+		UE_LOG(LogWeatherX, Log, TEXT("No valid player controller!"));
 	}
 	return ViewPos;
 }

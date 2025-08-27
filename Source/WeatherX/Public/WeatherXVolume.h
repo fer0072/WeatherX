@@ -45,7 +45,7 @@ public:
 	// Priority of this volume, decides whose weather effects is predominant when there are multiple overlapping weather volumes. 
 	// The order is undefined if two or more overlapping volumes have the same priority.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Volume Settings")
-	int32 Priority = -1;
+	int32 Priority = 2;
 
 private:
 

@@ -90,8 +90,9 @@ UWeatherXVolumeManager* UWeatherXPreviewSubsystem::GetWeatherVolumeManager(UWorl
 {
 	if (!InWorld)
 	{
-		UE_LOG(LogWeatherX, Warning, TEXT("World pointer appears to be null!"))
-			return nullptr;
+		UE_LOG(LogWeatherX, Error, TEXT("No valid UWorld instance!"));
+		
+		return nullptr;
 	}
 
 	UWeatherXPreviewSubsystem* Subsystem = InWorld->GetSubsystem<UWeatherXPreviewSubsystem>();
