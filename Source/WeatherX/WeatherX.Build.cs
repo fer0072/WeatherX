@@ -13,10 +13,10 @@ public class WeatherX : ModuleRules
 				// ... add public include paths required here ...
 			}
 			);
-				
-		
-		PrivateIncludePaths.AddRange(
+
+        PrivateIncludePaths.AddRange(
 			new string[] {
+                "WeatherX/WeatherXExample"
 				// ... add other private include paths required here ...
 			}
 			);
