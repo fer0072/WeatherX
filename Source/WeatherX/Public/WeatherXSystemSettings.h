@@ -24,7 +24,7 @@ public:
 	int32 TODPriority = 1;
 
 	UPROPERTY(config, EditAnywhere, Category = WeatherX)
-	float TODOpacity = 0.5f;
+	float TODOpacity = 0.6f;
 
 	UPROPERTY(config, EditAnywhere, Category = WeatherX)
 	int32 WeatherSystemPriority = 2;

@@ -9,7 +9,6 @@ UENUM(meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class EWeatherType : uint8
 {
 	None  UMETA(Hidden),
-	Sunny UMETA(DisplayName = "Sunny"),
 	Rainy UMETA(DisplayName = "Rainy"),
 	Snowy UMETA(DisplayName = "Snowy"),
 };

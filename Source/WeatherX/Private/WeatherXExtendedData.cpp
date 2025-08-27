@@ -177,11 +177,11 @@ void FWeatherXMaterialData::Apply()
 
 	if (MPCPath)
 	{
-		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("IsSnowy"), IsSnowy);
-		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("SnowAmount"), SnowAmount);
-		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("IsRainy"), IsRainy);
-		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("EnableRaindropsPostprocessEffect"), EnableRaindropsPostprocessEffect);
-		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance.Get(), MPCPath.Get(), TEXT("PuddleSize"), PuddleSize);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance->GetWorld(), MPCPath.Get(), TEXT("IsSnowy"), IsSnowy);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance->GetWorld(), MPCPath.Get(), TEXT("SnowAmount"), SnowAmount);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance->GetWorld(), MPCPath.Get(), TEXT("IsRainy"), IsRainy);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance->GetWorld(), MPCPath.Get(), TEXT("EnableRaindropsPostprocessEffect"), EnableRaindropsPostprocessEffect);
+		UKismetMaterialLibrary::SetScalarParameterValue(TrackedInstance->GetWorld(), MPCPath.Get(), TEXT("PuddleSize"), PuddleSize);
 	}
 
 	for (auto Component : TrackedInstance->GetComponents())
@@ -193,19 +193,18 @@ void FWeatherXMaterialData::Apply()
 			bool ShouldEnable = false;
 			if (Name == FString("RainNiagaraSystemComponent"))
 			{
-				ShouldEnable = IsRainy > 0.0f;
+				ShouldEnable = IsRainy > 0.0f && IsRainy > IsSnowy;
 			}
 			else if (Name == FString("LightningNiagaraSystemComponent"))
 			{
-				ShouldEnable = IsRainy > 0.0f;
+				ShouldEnable = IsRainy > 0.0f && IsRainy > IsSnowy;
 			}
 			else if (Name == FString("SnowNiagaraSystemComponent"))
 			{
-				ShouldEnable = IsSnowy > 0.0f;
+				ShouldEnable = IsSnowy > 0.0f && IsRainy < IsSnowy;
 			}
 
 			NiagaraComponent->SetActive(ShouldEnable);
-			NiagaraComponent->SetAutoActivate(ShouldEnable);
 		}
 	}
 }
