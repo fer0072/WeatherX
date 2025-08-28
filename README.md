@@ -4,6 +4,9 @@
 ## Description
 A UE5 weather system plugin that implements weather transition effects both spatially and temporally.
 
+Video:
+https://www.bilibili.com/video/BV19Gh2zUEn8
+
 ## Features
 - Spatial Weather Transitions：Pre-configured weather volumes which enable seamless weather transitions across different spatial zones.
 - Temporal Weather Progression: Queue-based weather event system for automated temporal transitions.
