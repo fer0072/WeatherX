@@ -15,22 +15,22 @@ class WEATHERX_API AWeatherXExampleVolume : public AWeatherXVolumeBase
 
 public:	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather Datas", meta = (DisplayName = "WeatherX Light Data"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Data", meta = (DisplayName = "WeatherX Light Data"))
 	FWeatherXDirectionalLightData LightData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather Datas", meta = (DisplayName = "WeatherX Sky Atmosphere Data"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Data", meta = (DisplayName = "WeatherX Sky Atmosphere Data"))
 	FWeatherXSkyAtmosphereData SkyAtmosphereData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather Datas", meta = (DisplayName = "WeatherX Sky Light Data"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Data", meta = (DisplayName = "WeatherX Sky Light Data"))
 	FWeatherXSkyLightData SkyLightData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather Datas", meta = (DisplayName = "WeatherX Exponential Height Fog Data"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Data", meta = (DisplayName = "WeatherX Exponential Height Fog Data"))
 	FWeatherXExponentialHeightFogData ExponentialHeightFogData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather Datas", meta = (DisplayName = "WeatherX Material Data"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Data", meta = (DisplayName = "WeatherX Material Data"))
 	FWeatherXMaterialData MaterialData;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather Datas", meta = (DisplayName = "WeatherX Niagara Data"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Data", meta = (DisplayName = "WeatherX Niagara Data"))
 	FWeatherXNiagaraData NiagaraData;
 };
 

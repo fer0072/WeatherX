@@ -5,6 +5,7 @@ TSharedPtr<FWeatherXBaseData> UWeatherXDataPacket::MergeDataInSingleLayer(TArray
 {
 	if (DataList.Num() == 1)
 	{
+		DataList[0]->Opacity = DataList[0]->Weight * DataList[0]->Opacity;
 		return DataList[0];
 	}
 

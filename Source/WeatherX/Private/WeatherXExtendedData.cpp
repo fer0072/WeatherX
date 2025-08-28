@@ -197,11 +197,11 @@ void FWeatherXMaterialData::Apply()
 			}
 			else if (Name == FString("LightningNiagaraSystemComponent"))
 			{
-				ShouldEnable = IsRainy > 0.0f && IsRainy > IsSnowy;
+				ShouldEnable = IsRainy > 0.5f && IsRainy > IsSnowy;
 			}
 			else if (Name == FString("SnowNiagaraSystemComponent"))
 			{
-				ShouldEnable = IsSnowy > 0.0f && IsRainy < IsSnowy;
+				ShouldEnable = IsSnowy > 0.3f && IsRainy < IsSnowy;
 			}
 
 			NiagaraComponent->SetActive(ShouldEnable);

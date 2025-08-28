@@ -71,7 +71,7 @@ void ATODManager::UpdateCurrentTimeOfDay()
 	if (!TODActor.IsValid()) return;
 
 	UClass* ActorClass = TODActor->GetClass();
-	FProperty* TimeOfDayProperty = ActorClass->FindPropertyByName(*FString("TimeOfDay"));
+	FProperty* TimeOfDayProperty = ActorClass->FindPropertyByName(*FString("DynamicTimeOfDay"));
 	if (!TimeOfDayProperty) return;
 
 	if (FDoubleProperty* DoubleProperty = CastField<FDoubleProperty>(TimeOfDayProperty))

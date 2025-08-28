@@ -39,7 +39,7 @@ public:
 	float TransitionWidth = 100.0f;
 
 	// The weight of this weather volume, used to blend weather effects of overlapping weather volume.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeatherX Volume Settings")
+	UPROPERTY(interp, EditAnywhere, BlueprintReadWrite, Category = "WeatherX Volume Settings", meta = (DisplayName = "WeatherX Volume Weight"))
 	float Weight = 1.0f;
 
 	// Priority of this volume, decides whose weather effects is predominant when there are multiple overlapping weather volumes. 
